@@ -1,9 +1,8 @@
-FROM alpine:3.19
+FROM nginx:alpine
 
-WORKDIR /www
-
-COPY product.html index.html
+COPY product.html /usr/share/nginx/html/index.html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8000
 
-CMD ["busybox", "httpd", "-f", "-p", "8000", "-h", "/www"]
+CMD ["nginx", "-g", "daemon off;"]
