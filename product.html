@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Star Phones · Price Lookup</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --text: #f0f0fa;
+    --muted: #6b6b8a;
+    --pill-bg: #1e1e2e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* HEADER */
+  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 20px 20px 28px; position: relative; overflow: hidden; }
+  .header::before { content: '★'; position: absolute; right: -10px; top: -10px; font-size: 120px; color: rgba(124,106,247,0.08); line-height: 1; }
+  .header-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .logo-star { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .header p { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; }
+  .rate-badges { display: flex; gap: 8px; margin-top: 14px; }
+  .rate-badge { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+  .rate-badge.r65 { color: #60a5fa; border-color: rgba(96,165,250,0.3); }
+  .rate-badge.r70 { color: #4ade80; border-color: rgba(74,222,128,0.3); }
+
+  /* BREADCRUMB */
+  .breadcrumb { padding: 12px 20px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); overflow-x: auto; white-space: nowrap; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .breadcrumb span { color: var(--text); font-weight: 500; }
+  .breadcrumb .sep { color: var(--muted); }
+  .back-btn { background: rgba(124,106,247,0.15); border: 1px solid rgba(124,106,247,0.3); color: var(--accent); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .back-btn:active { background: rgba(124,106,247,0.3); }
+
+  /* SCREENS */
+  .screen { display: none; padding: 16px 16px 100px; animation: fadeUp 0.25s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* CATEGORY CARDS (screen 1) */
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  .cat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .cat-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(124,106,247,0.12), transparent 70%); opacity: 0; transition: opacity 0.2s; }
+  .cat-card:active { transform: scale(0.97); }
+  .cat-card:active::after { opacity: 1; }
+  .cat-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+  .cat-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .cat-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .cat-card.cases { border-top: 3px solid #7c6af7; }
+  .cat-card.accessories { border-top: 3px solid #f7a26a; }
+  .cat-card.protectors { border-top: 3px solid #4ade80; }
+
+  /* SECTION TITLE */
+  .section-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* ATTRIBUTE LIST */
+  .attr-list { display: flex; flex-direction: column; gap: 8px; }
+  .attr-item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s; }
+  .attr-item:active { background: rgba(124,106,247,0.12); border-color: var(--accent); }
+  .attr-item-left { display: flex; flex-direction: column; gap: 2px; }
+  .attr-item-name { font-weight: 600; font-size: 14px; }
+  .attr-item-sub { font-size: 11px; color: var(--muted); }
+  .attr-arrow { color: var(--muted); font-size: 16px; }
+
+  /* PRODUCT CARDS */
+  .product-list { display: flex; flex-direction: column; gap: 10px; }
+  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+  .product-card:active { border-color: var(--accent); }
+  .product-name { font-weight: 600; font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
+  .product-attr2 { font-size: 11px; color: var(--muted); background: var(--pill-bg); border-radius: 6px; padding: 2px 8px; display: inline-block; margin-bottom: 8px; }
+  .price-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .price-pill { border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 600; text-align: center; flex: 1; min-width: 70px; }
+  .price-pill.usd { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+  .price-pill.r65 { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+  .price-pill.r70 { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+  .price-label { font-size: 9px; opacity: 0.7; font-weight: 400; display: block; margin-bottom: 1px; }
+
+  /* DETAIL VIEW */
+  .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 16px; }
+  .detail-product-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+  .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .detail-tag { background: rgba(124,106,247,0.15); border: 1px solid rgba(124,106,247,0.3); color: var(--accent); border-radius: 8px; padding: 3px 10px; font-size: 11px; font-weight: 500; }
+  .price-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .price-box { border-radius: 14px; padding: 16px 12px; text-align: center; }
+  .price-box.usd { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+  .price-box.r65 { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.25); }
+  .price-box.r70 { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); }
+  .price-box-label { font-size: 10px; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.3px; }
+  .price-box-value { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .price-box.usd .price-box-value { color: rgba(255,255,255,0.8); }
+  .price-box.r65 .price-box-value { color: #60a5fa; }
+  .price-box.r70 .price-box-value { color: #4ade80; }
+  .supplier-box { background: rgba(247,162,106,0.1); border: 1px solid rgba(247,162,106,0.25); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .supplier-icon { width: 36px; height: 36px; background: rgba(247,162,106,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .supplier-label { font-size: 10px; color: var(--muted); }
+  .supplier-name { font-weight: 700; font-size: 15px; color: var(--accent2); }
+
+  /* SEARCH */
+  .search-wrap { position: relative; margin-bottom: 14px; }
+  .search-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px 12px 40px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; }
+
+  /* NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(19,19,26,0.95); backdrop-filter: blur(12px); border-top: 1px solid var(--border); padding: 10px 20px 20px; display: flex; justify-content: space-around; }
+  .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 6px 14px; border-radius: 12px; transition: all 0.15s; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+  .nav-btn.active { color: var(--accent); background: rgba(124,106,247,0.12); }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-star">★</div>
+    <div>
+      <h1>Star Phones</h1>
+      <p>TRADE FAIR PRICE GUIDE</p>
+    </div>
+  </div>
+  <div class="rate-badges">
+    <div class="rate-badge r65">AUD @ 0.65</div>
+    <div class="rate-badge r70">AUD @ 0.70</div>
+    <div class="rate-badge" style="color:#f0f0fa">Ex. GST</div>
+  </div>
+</div>
+
+<div class="breadcrumb" id="breadcrumb">
+  <span>Home</span>
+</div>
+
+<!-- SCREEN 1: CATEGORIES -->
+<div class="screen active" id="screen-home">
+  <br>
+  <div class="section-title"><span class="section-dot" style="background:#7c6af7"></span> Select Category</div>
+  <div class="cat-grid">
+    <div class="cat-card cases" onclick="goAttr1('cases')">
+      <span class="cat-icon">📱</span>
+      <div class="cat-title">Cases &amp; Covers</div>
+      <div class="cat-count">25+ types</div>
+    </div>
+    <div class="cat-card accessories" onclick="goAttr1('accessories')">
+      <span class="cat-icon">🔌</span>
+      <div class="cat-title">Accessories</div>
+      <div class="cat-count">20+ types</div>
+    </div>
+    <div class="cat-card protectors" style="grid-column:span 2" onclick="goAttr1('protectors')">
+      <span class="cat-icon">🛡️</span>
+      <div class="cat-title">Screen Protectors</div>
+      <div class="cat-count">10+ types</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: ATTR 1 -->
+<div class="screen" id="screen-attr1">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-attr1" placeholder="Search category..." oninput="filterAttr1(this.value)">
+  </div>
+  <div class="section-title" id="attr1-title"><span class="section-dot" style="background:#7c6af7"></span> Categories</div>
+  <div class="attr-list" id="attr1-list"></div>
+</div>
+
+<!-- SCREEN 3: ATTR 2 / PRODUCTS -->
+<div class="screen" id="screen-attr2">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-products" placeholder="Search product..." oninput="filterProducts(this.value)">
+  </div>
+  <div class="section-title" id="attr2-title"><span class="section-dot" style="background:#7c6af7"></span> Products</div>
+  <div class="product-list" id="product-list"></div>
+</div>
+
+<!-- SCREEN 4: DETAIL -->
+<div class="screen" id="screen-detail">
+  <div id="detail-content"></div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goHome()">
+    <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn" id="nav-search" onclick="goSearch()">
+    <span class="nav-icon">🔍</span><span class="nav-label">Search All</span>
+  </button>
+</div>
+
+<script>
+// ── DATA ──
+const DATA = {
+  cases: [
+    // attr1, attr2, product, usd, aud65, aud70, supplier
+    ["MAGSAFE CLEAR CASE","IPHONE","MAGSAFE CLEAR",1.96,3.02,2.80,"PIKE"],
+    ["MAGSAFE CLEAR CASE","GOOGLE PIXEL","MAGSAFE CLEAR (PIXEL)",1.30,2.00,1.86,"DAVID"],
+    ["MAGSAFE CLEAR CASE","SAMSUNG Z SERIES","MAGSAFE CLEAR (Z FOLD & FLIP)",3.00,4.62,4.29,"DAVID"],
+    ["MAGSAFE CLEAR CASE","SAMSUNG S SERIES","MAGSAFE CLEAR (SAMSUNG S SERIES)",2.50,3.85,3.57,"DAVID"],
+    ["MAGSAFE CLEAR CASE","SAMSUNG","PRO RING CASE",2.15,3.31,3.07,"MERCURY"],
+    ["MAGSAFE SILICONE CASE","IPHONE","MAGSAFE SILICONE CASE",2.65,4.08,3.79,"MERCURY"],
+    ["MAGSAFE SILICONE CASE","IPHONE/SAMSUNG","MAGSAFE SILICONE CASE",2.50,3.85,3.57,"YELENA"],
+    ["MAGSAFE SILICONE CASE","PIXEL","MAGSAFE SILICONE CASE (PIXEL)",2.80,4.31,4.00,"YELENA"],
+    ["PURE CLEAR CASE","IPHONE/SAMSUNG","PURE SERIES CLEAR CASE",1.00,1.54,1.43,"TOKO - ICY"],
+    ["PURE CLEAR CASE","GOOGLE PIXEL","PURE SERIES (PIXEL)",0.90,1.38,1.29,"DAVID"],
+    ["SILICONE CASE","IPHONE/SAMSUNG","SILICONE CASE",2.15,3.31,3.07,"MERCURY"],
+    ["SILICONE CASE","IPHONE/SAMSUNG","SILICONE CASE (YELENA)",2.10,3.23,3.00,"YELENA"],
+    ["360 CASE","IPAD/TAB","360 CASE (MORE THAN 11 INCHES)",2.30,3.54,3.29,"DAVID"],
+    ["360 CASE","IPAD/TAB","360 CASE (9-11 INCHES)",1.70,2.62,2.43,"DAVID"],
+    ["360 CASE","IPAD/TAB","360 CASE (ROSE GOLD COLOR 9-11 INCHES)",1.80,2.77,2.57,"DAVID"],
+    ["RING CASE","IPHONE/SAMSUNG","STAR RING",2.76,4.25,3.94,"PIKE"],
+    ["KNIGHT CASE","IPHONE/SAMSUNG","STAR KNIGHT",2.25,3.46,3.21,"PIKE"],
+    ["FLOWER CASE","IPHONE/SAMSUNG","S&J FLORAL",2.25,3.46,3.21,"PIKE"],
+    ["FLORAL CASE","IPHONE","S&J FLORAL CASE (ORANGE COLOR)",2.45,3.77,3.50,"JESSIE (KING SOUL)"],
+    ["REAL FLOWER CASE","IPHONE","STAR MAGSAFE REAL FLOWER CASE",2.45,3.77,3.50,"JESSIE (KING SOUL)"],
+    ["REAL FLOWER CASE","IPHONE","STAR REAL FLOWER CASE",2.00,3.08,2.86,"JESSIE (KING SOUL)"],
+    ["STAR BALANCE CASE","IPHONE/SAMSUNG","STAR BALANCE",2.10,3.23,3.00,"PIKE"],
+    ["TRIANGLE CASE","IPHONE/SAMSUNG","TRIANGLE CASE",1.05,1.62,1.50,"TOKO - ICY"],
+    ["TRIANGLE MAGSAFE CASE","IPHONE/SAMSUNG","TRIANGLE MAGSAFE CASE",1.80,2.77,2.57,"TOKO - ICY"],
+    ["CLEAR CASE","SAMSUNG FLIP","SUPER PROTECT CLEAR - FLIP",1.15,1.77,1.64,"MERCURY"],
+    ["CLEAR CASE","SAMSUNG FOLD","SUPER PROTECT CLEAR - FOLD",1.25,1.92,1.79,"MERCURY"],
+    ["RAINBOW GLITTER CASE","IPHONE","RAINBOW GLITTER CASE",2.20,3.38,3.14,"DAVID"],
+    ["SPIGEN CARD HOLDER CASE","IPHONE","SPIGEN CARD HOLDER CASE",1.10,1.69,1.57,"DAVID"],
+    ["DIAMOND MAGSAFE CASE","IPHONE/SAMSUNG","STAR DIAMOND MAGSAFE",2.10,3.23,3.00,"DAVID"],
+    ["GUARDIAN CASE","IPHONE/SAMSUNG","STAR GUARDIAN",1.95,3.00,2.79,"DAVID"],
+    ["MAG AURA CASE","IPHONE","MAG AURA CASE",2.20,3.38,3.14,"JESSIE (KING SOUL)"],
+    ["PARIS CASE","IPHONE/SAMSUNG","S&J PARIS CASE",2.50,3.85,3.57,"JESSIE (KING SOUL)"],
+    ["PU LEATHER CASE","IPHONE","PU LEATHER",2.00,3.08,2.86,"DAVID"],
+    ["SYMMETRY CASE","IPHONE","SYMMETRY CASE",1.70,2.62,2.43,"DAVID"],
+    ["PIXEL BACK CASE","PIXEL","MAGSAFE BLACK CASE (PIXEL)",1.40,2.15,2.00,"DAVID"],
+    ["Z FOLD BACK CASE","SAMSUNG Z SERIES","MAGSAFE BLACK CASE (FOLD 7)",1.90,2.92,2.71,"DAVID"],
+    ["FLIP SMART CASE","IPAD","IPAD FLIP CASE",6.30,9.69,9.00,"MERCURY"],
+    ["FLIP SMART CASE","IPAD","IPAD FLIP CASE (MINI)",5.80,8.92,8.29,"MERCURY"],
+    ["BLUEMOON DIARY","IPHONE/SAMSUNG","BLUEMOON DIARY",1.80,2.77,2.57,"MERCURY"],
+    ["RICH DIARY","IPHONE/SAMSUNG","RICH DIARY",2.25,3.46,3.21,"MERCURY"],
+    ["MANSOOR DIARY","IPHONE/SAMSUNG","MANSOOR DIARY",2.25,3.46,3.21,"MERCURY"],
+    ["GOLDEN RING CASE","SAMSUNG","GOLDEN RING BELL CLEAR",1.55,2.38,2.21,"MERCURY"],
+    ["GOLDEN RING HARD","SAMSUNG FLIP/FOLD","GOLDEN RING HARD CASE",2.57,3.95,3.67,"MERCURY"],
+    ["HANMAN CASE","SAMSUNG","HANMAN MIRO - 2",3.15,4.85,4.50,"HANAMAN"],
+    ["HANMAN CASE","SAMSUNG","HANMAN MIRO - 2 ULTRA",3.48,5.35,4.97,"HANAMAN"],
+    ["HANMAN CASE","IPHONE","HANMAN MIRO - 3",3.69,5.68,5.27,"HANAMAN"],
+    ["HANMAN CASE","SAMSUNG","HANAMAN Z FLIP / FOLD",2.94,4.52,4.20,"HANAMAN"],
+    ["HANMAN CASE","SAMSUNG","HANMAN MILL",1.79,2.75,2.56,"HANAMAN"],
+    ["HANMAN CASE","GOOGLE PIXEL","PIXEL HANMAN MILL COVERS",1.79,2.75,2.56,"HANAMAN"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","9.7 - 11 INCHES",6.10,9.38,8.71,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","13 INCHES",7.75,11.92,11.07,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","IPAD MINI SERIES",5.15,7.92,7.36,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","TAB A9",5.25,8.08,7.50,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","TAB A9 PLUS",6.15,9.46,8.79,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","TAB A8, S9FE",6.35,9.77,9.07,"LEO"],
+    ["SURVIVOR CASE","NORMAL SURVIVOR","TAB S9FE PLUS",7.45,11.46,10.64,"LEO"],
+    ["SURVIVOR CASE","BUTTERFLY SURVIVOR","10.2",5.73,8.82,8.19,"LEO"],
+    ["SURVIVOR CASE","BUTTERFLY SURVIVOR","10.9 INCHES",6.03,9.28,8.61,"LEO"],
+    ["SURVIVOR CASE","BUTTERFLY SURVIVOR","9.7 INCHES",5.58,8.58,7.97,"LEO"],
+    ["SURVIVOR CASE","BUTTERFLY SURVIVOR","MINI 6/7",5.15,7.92,7.36,"LEO"],
+    ["SURVIVOR CASE","AVENGER SURVIVOR","10.9 - 11 INCHES",6.25,9.62,8.93,"LEO"],
+    ["SURVIVOR CASE","AVENGER SURVIVOR","9.7 - 10.2 INCHES",6.06,9.32,8.66,"LEO"],
+    ["SURVIVOR CASE","RAINBOW PINK","9.7 - 11 INCHES",6.37,9.80,9.10,"LEO"],
+    ["SURVIVOR CASE","RAINBOW PINK","MINI 4/5",5.17,7.95,7.39,"LEO"],
+    ["SURVIVOR CASE","RAINBOW PINK","MINI 6/7",5.31,8.17,7.59,"LEO"],
+    ["SURVIVOR CASE","BUSINESS BOOKS CASE","10.2 INCHES",6.05,9.31,8.64,"LEO"],
+    ["SURVIVOR CASE","BUSINESS BOOKS CASE","10.9 - 11 INCHES",6.15,9.46,8.79,"LEO"],
+    ["SURVIVOR CASE","BUSINESS BOOKS CASE","13 INCHES",7.25,11.15,10.36,"LEO"],
+  ],
+  accessories: [
+    ["KEYBOARD CASES","10.2/10.5","IPAD 10.2/10.5",18.00,27.69,25.71,"VERONICA"],
+    ["KEYBOARD CASES","AIR4/5/PRO 11","IPAD PRO11/AIR4/AIR5",18.00,27.69,25.71,"VERONICA"],
+    ["KEYBOARD CASES","PRO 11 2024","IPAD PRO 11 2024",18.00,27.69,25.71,"VERONICA"],
+    ["KEYBOARD CASES","10.9","IPAD 10.9",18.00,27.69,25.71,"VERONICA"],
+    ["KEYBOARD CASES","12.9","IPAD 12.9",20.61,31.71,29.44,"VERONICA"],
+    ["KEYBOARD CASES","PRO 13","IPAD PRO 13 2024",20.61,31.71,29.44,"VERONICA"],
+    ["KEYBOARD CASES","MINI 6/7","IPAD MINI 6/7",17.78,27.35,25.40,"VERONICA"],
+    ["STYLUS","UNIVERSAL","UNIVERSAL STYLUS",4.00,6.15,5.71,"VERONICA"],
+    ["STYLUS","IPAD","STYLUS FOR IPADS",8.27,12.72,11.81,"VERONICA"],
+    ["NORMAL CABLE","USB-A TO 8PIN","USB-A TO LIGHTNING (1M)",0.48,0.74,0.69,"LOUISE"],
+    ["NORMAL CABLE","TYPE-C TO LIGHTNING","USB-C TO LIGHTNING (1M) - 20W",0.82,1.26,1.17,"LOUISE"],
+    ["NORMAL CABLE","C TO C","TYPE-C TO TYPE-C (1M) - 60W",0.49,0.75,0.70,"LOUISE"],
+    ["NORMAL CABLE","A TO C","USB-A TO TYPE-C (1M)",0.47,0.72,0.67,"LOUISE"],
+    ["NORMAL CABLE","USB-A TO 8PIN","USB-A TO LIGHTNING (2M)",0.58,0.89,0.83,"LOUISE"],
+    ["NORMAL CABLE","C TO C","TYPE-C TO TYPE-C (2M) - 60W",0.68,1.05,0.97,"LOUISE"],
+    ["NORMAL CABLE","A TO C","USB-A TO TYPE-C (2M)",0.67,1.03,0.96,"LOUISE"],
+    ["NORMAL CABLE","A TO MICRO USB","USB-A TO MICRO USB (1M)",0.49,0.75,0.70,"LOUISE"],
+    ["AUX CABLE","C TO AUX","TYPE-C TO AUX",0.76,1.17,1.09,"LOUISE"],
+    ["AUX CABLE","LIGHTNING TO AUX","LIGHTNING TO AUX",0.54,0.83,0.77,"LOUISE"],
+    ["AUX CABLE","C TO AUX + CHARGER","TYPE-C TO AUX + CHARGER",0.91,1.40,1.30,"LOUISE"],
+    ["AUX CABLE","LIGHTNING TO AUX + CHARGER","LIGHTNING TO AUX + CHARGER",0.85,1.31,1.21,"LOUISE"],
+    ["CAR CHARGER","45W+8 PIN CABLE","CAR CHARGER 45W + 8PIN CABLE",1.49,2.29,2.34,"LOUISE"],
+    ["CAR CHARGER","45W+ TYPE-C CABLE","CAR CHARGER 45W + TYPE-C CABLE",1.85,2.85,2.90,"LOUISE"],
+    ["CAR CHARGER","45W","CAR CHARGER 45W",2.01,3.09,3.16,"LOUISE"],
+    ["OTG ADAPTORS","C TO C","OTG TYPE-C MALE TO TYPE-C FEMALE",0.29,0.45,0.41,"LOUISE"],
+    ["OTG ADAPTORS","LIGHTNING TO TYPE-C","OTG LIGHTNING MALE TO TYPE-C FEMALE",0.41,0.63,0.59,"LOUISE"],
+    ["OTG ADAPTORS","TYPE-C TO LIGHTNING","OTG TYPE-C MALE TO LIGHTNING FEMALE",0.43,0.66,0.61,"LOUISE"],
+    ["TOUGH CABLES","USB-A TO 8PIN","USB-A TO LIGHTNING (1M) - 30W",0.77,1.18,1.10,"JENNY"],
+    ["TOUGH CABLES","TYPE-C TO LIGHTNING","USB-C TO LIGHTNING (1M) - 20W",1.13,1.74,1.61,"JENNY"],
+    ["TOUGH CABLES","C TO C","TYPE-C TO TYPE-C (1M) - 60W",0.85,1.31,1.21,"JENNY"],
+    ["TOUGH CABLES","A TO C","USB-A TO TYPE-C (1M) - 18W",0.75,1.15,1.07,"JENNY"],
+    ["TOUGH CABLES","USB-A TO 8PIN","USB-A TO LIGHTNING (2M) - 30W",0.90,1.38,1.29,"JENNY"],
+    ["TOUGH CABLES","C TO C","TYPE-C TO TYPE-C (2M) - 60W",1.13,1.74,1.61,"JENNY"],
+    ["TOUGH CABLES","A TO C","USB-A TO TYPE-C (2M) - 18W",0.97,1.49,1.39,"JENNY"],
+    ["WALL CHARGER","33W","33W WALL CHARGER",3.17,4.88,4.53,"JENNY"],
+    ["WALL CHARGER","45W","45W WALL CHARGER",5.78,8.89,8.26,"KF SENIOR"],
+    ["WALL CHARGER","20W","20W WALL CHARGER",2.01,3.09,2.87,"DAVID"],
+    ["WALL CHARGER","12W","12W UNIVERSAL CHARGER",4.53,6.97,6.47,"KF SENIOR"],
+    ["PHONE HOLDERS","S24","S24 MOBILE PHONE HOLDER",5.00,7.69,7.14,"JENNY"],
+    ["POWER BANKS","X1","X1 - 5000 mAh + Magsafe",7.30,11.23,10.43,"AQUA"],
+    ["POWER BANKS","X3","X3 - 5000 mAh",4.80,7.38,6.86,"AQUA"],
+    ["POWER BANKS","X5","X5 - 10000 mAh + Magsafe",8.90,13.69,12.71,"AQUA"],
+    ["POWER BANKS","X7","X7 - 10000 mAh",8.50,13.08,12.14,"AQUA"],
+    ["WIRELESS EARPODS","BUMBLE","STAR BUMBLE",4.74,7.29,6.77,"JOCELYN"],
+    ["WIRELESS EARPODS","NOVA","STAR NOVA",6.80,10.46,9.71,"JOCELYN"],
+    ["WIRELESS EARPODS","SONIC","STAR SONIC",11.69,17.98,16.70,"LELISU"],
+    ["WIRELESS EARPODS","VEN-DEN","VEN-DEN ~ BLACK",2.71,4.17,3.87,"VEN-DEN"],
+    ["WIRELESS EARPODS","STORM","STAR STORM TWS",7.30,11.23,10.43,"SHENGAN TECHNOLOGY"],
+    ["SPEAKERS","THUNDER","STAR THUNDER SPEAKER",15.77,24.26,22.53,"JSOUND TECHNOLOGIES"],
+    ["WIRED EARPHONES","WITH BUDS","EARPHONES WITH BUDS TYPE-C",1.17,1.80,1.67,"LELISU"],
+    ["WIRED EARPHONES","WITH BUDS","EARPHONES WITH BUDS LIGHTNING",1.27,1.95,1.81,"LELISU"],
+    ["WIRED EARPHONES","WITHOUT BUDS","EARPHONES WITHOUT BUDS - TYPE-C",1.10,1.69,1.57,"LELISU"],
+    ["WIRED EARPHONES","WITHOUT BUDS","EARPHONES WITHOUT BUDS - LIGHTNING",1.20,1.85,1.71,"LELISU"],
+    ["HEADPHONES","FUSION","FUSION HEADSET",8.85,13.62,12.64,"LELISU"],
+    ["WIRELESS CHARGER","4 IN 1","4 IN 1 WIRELESS CHARGER - WHITE",10.50,16.15,15.00,"MANDC"],
+    ["WIRELESS CHARGER","4 IN 1","4 IN 1 WIRELESS CHARGER Qi2 - BLACK",12.50,19.23,17.86,"MANDC"],
+    ["WIRELESS CHARGER","3 IN 1","3 IN 1 WIRELESS CHARGER",5.80,8.92,8.29,"MANDC"],
+    ["WIRELESS CHARGER","DESKTOP","DESKTOP WIRELESS CHARGER - MS1",4.80,7.38,6.86,"PENG"],
+    ["IWATCH BANDS","LEATHER NON-MAGNETIC","LEATHER NON-MAGNETIC BAND",4.20,6.46,6.00,"DOLLY"],
+    ["IWATCH BANDS","MILANESE","MILANESE BANDS - (BLACK)",1.32,2.03,1.89,"DOLLY"],
+    ["IWATCH BANDS","MILANESE","MILANESE BANDS - (SILVER)",1.18,1.82,1.69,"DOLLY"],
+    ["IWATCH BANDS","MILANESE","MILANESE BANDS - (LIGHT ROSE GOLD)",2.10,3.23,3.00,"DOLLY"],
+    ["IWATCH BANDS","MILANESE","MILANESE BANDS - (RETRO GOLD)",1.45,2.23,2.07,"DOLLY"],
+    ["IWATCH BANDS","SILICONE BAND","SILICONE BAND",0.73,1.12,1.04,"LI - DO BEST"],
+    ["IWATCH BANDS","NYLON BAND","NYLON BAND",0.64,0.98,0.91,"LI - DO BEST"],
+    ["IWATCH BANDS","LEATHER MAGNETIC","LEATHER MAGNETIC LINK BAND",1.46,2.25,2.09,"LI - DO BEST"],
+    ["IWATCH BANDS","SILICONE MAGNETIC","SILICONE MAGNETIC LINK BAND",2.62,4.03,3.74,"LI - DO BEST"],
+    ["IWATCH 360 CASE","38 - 45MM","IWATCH 360 CASE (38-45MM)",0.43,0.66,0.61,"LI - DO BEST"],
+    ["IWATCH 360 CASE","49 & ABOVE","IWATCH 360 CASE (49, S10-42, S10-46MM)",0.52,0.80,0.74,"LI - DO BEST"],
+    ["IWATCH 360 CASE","ELECTRO PLATING","IWATCH 360 CASE - ELECTRO PLATING",0.58,0.89,0.83,"LI - DO BEST"],
+    ["AIRPODS CASES","SILICONE CASE","AIRPODS SILICONE CASES",0.43,0.66,0.61,"KARINA"],
+    ["AIRPODS CASES","LEATHER CASE","AIRPODS LEATHER CASES",1.80,2.77,2.57,"KARINA"],
+    ["CARD HOLDERS","MAGNETIC","PU LEATHER MAGNETIC CARD HOLDER",1.00,1.54,1.43,"KARINA"],
+    ["CARD HOLDERS","3M GLUE","PU LEATHER 3M GLUE CARD HOLDERS",0.65,1.00,0.93,"KARINA"],
+    ["PHONE HOLDER","ALUMINIUM P2A","ALUMINIUM STAND P2A (MOBILE)",2.13,3.28,3.04,"CARRIE"],
+    ["PHONE HOLDER","S23","S23 HOLDER",6.48,9.97,9.26,"PENG"],
+    ["PHONE HOLDER","S22","PHONE HOLDER S22 (Dashboard & Windscreen - Wireless + Magsafe)",6.40,9.85,9.14,"JULIA"],
+    ["PHONE HOLDER","S4","PHONE HOLDER S4 (Super Magnetic Dashboard Mount)",2.40,3.69,3.43,"JULIA"],
+    ["PHONE HOLDER","S1","PHONE HOLDER S1 (Super Magnetic Air Outlet Mount)",3.00,4.62,4.29,"JULIA"],
+    ["PHONE HOLDER","S5","PHONE HOLDER S5 (Super Magnetic Dashboard Mount)",3.70,5.69,5.29,"JULIA"],
+    ["PHONE HOLDER","S2","PHONE HOLDER S2 (Airvent Mount - Magsafe)",2.70,4.15,3.86,"JULIA"],
+    ["PHONE HOLDER","S9","PHONE HOLDER S9 (360 Rotatable Dashboard Mount)",3.70,5.69,5.29,"JULIA"],
+    ["PHONE HOLDER","S8","PHONE HOLDER S8 (Airvent Mount)",3.00,4.62,4.29,"JULIA"],
+    ["PHONE HOLDER","S35","PHONE HOLDER S35 (2-in-1 Dashboard + Airvent + Wireless Charging)",9.55,14.69,13.64,"JULIA"],
+    ["TAB / IPAD HOLDER","ALUMINIUM P8","ALUMINIUM STAND P8 (TABLET)",3.85,5.92,5.50,"CARRIE"],
+    ["WRISTLETS","LEATHER","S&J WRISTLET - LEATHER + GOLD HARDWARE",1.65,2.54,2.36,"KITTY"],
+    ["WRISTLETS","SOLID COLOR","S&J WRISTLET - SILVER, GOLD",2.30,3.54,3.29,"KITTY"],
+    ["WRISTLETS","BEAD","S&J WRISTLET - BEAD + GOLD",1.00,1.54,1.43,"KITTY"],
+    ["WRISTLETS","DIAMOND","S&J WRISTLET - DIAMOND + SILVER HARDWARE",0.80,1.23,1.14,"KITTY"],
+    ["WRISTLETS","NYLON","S&J WRISTLET - NYLON STRAP + GOLD HARDWARE",1.90,2.92,2.71,"KITTY"],
+    ["BODY STRAPS","NYLON","S&J CROSS BODY - NYLON STRAP + GOLD CHAIN",2.54,3.91,3.63,"KITTY"],
+    ["BODY STRAPS","LEATHER","S&J CROSS BODY - LEATHER + GOLD CHAIN",2.15,3.31,3.07,"KITTY"],
+    ["BODY STRAPS","PLAIN","S&J CROSS BODY - ALL BLACK",1.68,2.58,2.40,"KITTY"],
+    ["POP SOCKETS","NON-MAGSAFE","SUCTION SILICONE",0.40,0.62,0.57,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","GLITTER AIRBAG",1.30,2.00,1.86,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","MACRON AIRBAG",1.30,2.00,1.86,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","SILICONE AIRBAG",1.25,1.92,1.79,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","SHINY SHELL",1.40,2.15,2.00,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","REAL FLOWER",1.37,2.11,1.96,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","FLOWER AIRBAG",1.30,2.00,1.86,"JESSIE (KING SOUL)"],
+    ["POP SOCKETS","MAGSAFE","SUCTION SILICONE AIRBAG",1.65,2.54,2.36,"JESSIE (KING SOUL)"],
+    ["SELFIE STICKS","P160","P160 (Wireless + Magsafe + 25cm-1.54m) ~ Black",6.28,9.66,8.97,"WILL"],
+    ["SELFIE STICKS","P08Y PRO","P08Y Pro (Wireless + Magsafe + 16cm-71.5cm) ~ Black",4.42,6.80,6.31,"WILL"],
+    ["AIRTAG","AIRTAG","Smart Finder AirTag ~ White",3.04,4.67,4.34,"ALINE"],
+  ],
+  protectors: [
+    ["CAMERA GLASS PROTECTOR","IP/SAM/PXL","CAMERA GLASS (IPHONE, SAMSUNG, PIXEL)",0.42,0.65,0.60,"MICHAEL"],
+    ["9D","IPHONE","9D - IPHONE",0.37,0.57,0.53,"MICHAEL"],
+    ["9D","SAMSUNG","9D - SAMSUNG",0.55,0.85,0.79,"MICHAEL"],
+    ["CERAMIC","IPHONE","CERAMIC (IPHONE)",0.22,0.34,0.31,"MICHAEL"],
+    ["EDGE GLUE","SAM/PXL","EDGE GLUE GLASS (SAMSUNG AND PIXEL)",0.43,0.66,0.61,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","IPAD","IPAD TEMPERED GLASS (12-13 INCHES)",1.80,2.77,2.57,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","IPAD","IPAD TEMPERED GLASS (MINI Series)",0.84,1.29,1.20,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","IPAD","IPAD TEMPERED GLASS (9-11 INCHES)",1.02,1.57,1.46,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","TAB","TAB TEMPERED GLASS (7-8 INCHES)",0.84,1.29,1.20,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","TAB","TAB TEMPERED GLASS (9-11 INCHES)",1.02,1.57,1.46,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","TAB","TAB TEMPERED GLASS (12-13 INCHES)",1.75,2.69,2.50,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","TAB","TAB TEMPERED GLASS (14 INCHES)",2.25,3.46,3.21,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","IPHONE","NORMAL TEMPERED GLASS (IPHONE)",0.23,0.35,0.33,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","SAM/PXL","NORMAL TEMPERED GLASS (SAMSUNG & PIXEL)",0.19,0.29,0.27,"MICHAEL"],
+    ["NORMAL TEMPERED GLASS","PIXEL 9 SERIES","NORMAL TEMPERED GLASS (PIXEL 9 & 10 SERIES)",0.22,0.34,0.31,"MICHAEL"],
+    ["POLYMER FILM","NORMAL POLYMER","POLYMER FILM (SAMSUNG S SERIES)",1.03,1.58,1.47,"MICHAEL"],
+    ["POLYMER FILM","PRIVACY POLYMER","PRIVACY POLYMER FILM (SAMSUNG S SERIES)",1.30,2.00,1.86,"MICHAEL"],
+    ["POLYMER FILM","NORMAL POLYMER","FLIP 1PC (FRONT) ONLY SCREEN PROTECTOR",1.09,1.68,1.56,"LANBI"],
+    ["POLYMER FILM","NORMAL POLYMER","FOLD 1PC (FRONT) ONLY SCREEN PROTECTOR",1.47,2.26,2.10,"LANBI"],
+    ["PRIVACY PROTECTOR","IPHONE","PRIVACY SCREEN PROTECTORS (IPHONE)",0.58,0.89,0.83,"MICHAEL"],
+    ["ALLOY","DIAMOND ALLOY","DIAMOND ALLOY 3 HOLES",0.69,1.06,0.99,"MICHAEL"],
+    ["ALLOY","DIAMOND ALLOY","DIAMOND ALLOY 2 HOLES",0.60,0.92,0.86,"MICHAEL"],
+    ["ALLOY","NORMAL ALLOY","NORMAL ALLOY 3 HOLES",0.85,1.31,1.21,"MICHAEL"],
+    ["ALLOY","NORMAL ALLOY","NORMAL ALLOY 2 HOLES",0.65,1.00,0.93,"MICHAEL"],
+    ["ALLOY","NORMAL ALLOY","CAMERA ALLOY (SAMSUNG ULTRA SERIES)",0.75,1.15,1.07,"MICHAEL"],
+    ["ALLOY","NORMAL ALLOY","CAMERA ALLOY (SAMSUNG S/S PLUS)",0.65,1.00,0.93,"MICHAEL"],
+    ["ALLOY","NORMAL ALLOY","CAMERA ALLOY (SAMSUNG FLIP AND FOLD)",0.65,1.00,0.93,"MICHAEL"],
+    ["ALLOY","COLORED ALLOY","COLORED ALLOY 3 HOLES",0.85,1.31,1.21,"MICHAEL"],
+    ["WARRIOR PROTECTOR","WARRIOR","WARRIOR SCREEN PROTECTOR",0.72,1.11,1.03,"MICHAEL"],
+    ["SAPPHIRE PROTECTOR","SAPPHIRE","SAPPHIRE COATING SCREEN PROTECTOR (INDIVIDUAL)",2.39,3.68,3.41,"LANBI"],
+    ["IWATCH PROTECTOR","PMMA FILM","IWATCH GLASS PROTECTORS (38-45MM, S10-42, S10-46MM)",0.25,0.38,0.36,"LANBI"],
+    ["IWATCH PROTECTOR","PMMA FILM","IWATCH GLASS PROTECTORS (49MM)",0.40,0.62,0.57,"LANBI"],
+  ]
+};
+
+const CAT_LABELS = { cases: 'Cases & Covers', accessories: 'Accessories', protectors: 'Screen Protectors' };
+const CAT_COLORS = { cases: '#7c6af7', accessories: '#f7a26a', protectors: '#4ade80' };
+
+let currentCat = null, currentAttr1 = null, currentAttr2 = null;
+let filteredData = [];
+
+function fmt(v) { return v == null ? 'TBC' : '$' + v.toFixed(2); }
+
+function setBreadcrumb(parts) {
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = parts.map((p,i) => i < parts.length-1 ? `<span style="color:var(--muted)">${p}</span><span class="sep"> › </span>` : `<span>${p}</span>`).join('');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function goHome() {
+  currentCat = null; currentAttr1 = null;
+  setBreadcrumb(['Home']);
+  showScreen('home');
+}
+
+function goAttr1(cat) {
+  currentCat = cat;
+  currentAttr1 = null;
+  const color = CAT_COLORS[cat];
+  document.getElementById('attr1-title').innerHTML = `<span class="section-dot" style="background:${color}"></span> ${CAT_LABELS[cat]}`;
+  document.getElementById('search-attr1').value = '';
+  renderAttr1(DATA[cat]);
+  setBreadcrumb(['Home', CAT_LABELS[cat]]);
+  showScreen('attr1');
+}
+
+function renderAttr1(data) {
+  const groups = {};
+  data.forEach(r => { if (!groups[r[0]]) groups[r[0]] = new Set(); groups[r[0]].add(r[1]); });
+  const list = document.getElementById('attr1-list');
+  list.innerHTML = Object.entries(groups).map(([a1, a2set]) => `
+    <div class="attr-item" onclick="goProducts('${a1.replace(/'/g,"\\'")}')">
+      <div class="attr-item-left">
+        <div class="attr-item-name">${a1}</div>
+        <div class="attr-item-sub">${[...a2set].filter(Boolean).join(' · ') || 'All variants'}</div>
+      </div>
+      <span class="attr-arrow">›</span>
+    </div>`).join('');
+}
+
+function filterAttr1(q) {
+  const data = DATA[currentCat].filter(r => r[0].toLowerCase().includes(q.toLowerCase()) || r[1].toLowerCase().includes(q.toLowerCase()));
+  renderAttr1(data);
+}
+
+function goProducts(attr1) {
+  currentAttr1 = attr1;
+  const color = CAT_COLORS[currentCat];
+  document.getElementById('attr2-title').innerHTML = `<span class="section-dot" style="background:${color}"></span> ${attr1}`;
+  document.getElementById('search-products').value = '';
+  filteredData = DATA[currentCat].filter(r => r[0] === attr1);
+  renderProducts(filteredData);
+  setBreadcrumb(['Home', CAT_LABELS[currentCat], attr1]);
+  showScreen('attr2');
+}
+
+function renderProducts(data) {
+  const list = document.getElementById('product-list');
+  if (!data.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>No products found</div></div>'; return; }
+  list.innerHTML = data.map((r,i) => `
+    <div class="product-card" onclick="goDetail(${DATA[currentCat].indexOf(r)})">
+      ${r[1] ? `<div class="product-attr2">${r[1]}</div>` : ''}
+      <div class="product-name">${r[2]}</div>
+      <div class="price-row">
+        <div class="price-pill usd"><span class="price-label">USD</span>${fmt(r[3])}</div>
+        <div class="price-pill r65"><span class="price-label">AUD @ 0.65</span>${fmt(r[4])}</div>
+        <div class="price-pill r70"><span class="price-label">AUD @ 0.70</span>${fmt(r[5])}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterProducts(q) {
+  const filtered = filteredData.filter(r => r[2].toLowerCase().includes(q.toLowerCase()) || r[1].toLowerCase().includes(q.toLowerCase()));
+  renderProducts(filtered);
+}
+
+function goDetail(idx) {
+  const r = DATA[currentCat][idx];
+  setBreadcrumb(['Home', CAT_LABELS[currentCat], r[0], r[2].length > 20 ? r[2].slice(0,20)+'…' : r[2]]);
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-card">
+      <div class="detail-product-name">${r[2]}</div>
+      <div class="detail-tags">
+        <span class="detail-tag">${r[0]}</span>
+        ${r[1] ? `<span class="detail-tag">${r[1]}</span>` : ''}
+        <span class="detail-tag">${CAT_LABELS[currentCat]}</span>
+      </div>
+      <div class="price-grid">
+        <div class="price-box usd">
+          <div class="price-box-label">USD</div>
+          <div class="price-box-value">${fmt(r[3])}</div>
+        </div>
+        <div class="price-box r65">
+          <div class="price-box-label">AUD @ 0.65</div>
+          <div class="price-box-value">${fmt(r[4])}</div>
+        </div>
+        <div class="price-box r70">
+          <div class="price-box-label">AUD @ 0.70</div>
+          <div class="price-box-value">${fmt(r[5])}</div>
+        </div>
+      </div>
+      <div class="supplier-box">
+        <div class="supplier-icon">🏷️</div>
+        <div>
+          <div class="supplier-label">SUPPLIER</div>
+          <div class="supplier-name">${r[6]}</div>
+        </div>
+      </div>
+    </div>
+    <button class="back-btn" style="width:100%;padding:14px;border-radius:14px;font-size:14px" onclick="showScreen('attr2')">← Back to Products</button>`;
+  showScreen('detail');
+}
+
+function goSearch() {
+  currentCat = 'cases'; // default, will search all
+  // Build unified search screen inline
+  const allData = [...DATA.cases.map(r=>({...r, cat:'cases'})), ...DATA.accessories.map(r=>({...r, cat:'accessories'})), ...DATA.protectors.map(r=>({...r, cat:'protectors'}))];
+  document.getElementById('attr2-title').innerHTML = `<span class="section-dot" style="background:#fff"></span> Search All Products`;
+  document.getElementById('search-products').value = '';
+  filteredData = Object.values(DATA).flat();
+  renderProductsAll(filteredData);
+  setBreadcrumb(['Search All']);
+  showScreen('attr2');
+  // Override filter
+  document.getElementById('search-products').oninput = function() {
+    const q = this.value.toLowerCase();
+    const res = Object.values(DATA).flat().filter(r => r[2].toLowerCase().includes(q) || r[0].toLowerCase().includes(q) || r[1].toLowerCase().includes(q) || r[6].toLowerCase().includes(q));
+    renderProductsAll(res);
+  };
+}
+
+function renderProductsAll(data) {
+  const list = document.getElementById('product-list');
+  if (!data.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>No products found</div></div>'; return; }
+  list.innerHTML = data.slice(0,50).map(r => `
+    <div class="product-card" style="border-left:3px solid ${CAT_COLORS[findCat(r)] || '#7c6af7'}">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${r[0]} ${r[1] ? '· '+r[1] : ''}</div>
+      <div class="product-name">${r[2]}</div>
+      <div class="price-row">
+        <div class="price-pill usd"><span class="price-label">USD</span>${fmt(r[3])}</div>
+        <div class="price-pill r65"><span class="price-label">AUD @ 0.65</span>${fmt(r[4])}</div>
+        <div class="price-pill r70"><span class="price-label">AUD @ 0.70</span>${fmt(r[5])}</div>
+      </div>
+      <div style="font-size:10px;color:var(--accent2);margin-top:6px">🏷️ ${r[6]}</div>
+    </div>`).join('') + (data.length > 50 ? `<div class="empty" style="padding:16px">Showing first 50 — refine your search</div>` : '');
+}
+
+function findCat(row) {
+  if (DATA.cases.includes(row)) return 'cases';
+  if (DATA.accessories.includes(row)) return 'accessories';
+  return 'protectors';
+}
+
+// Reset product filter on normal product screen
+document.getElementById('search-products').oninput = function() { filterProducts(this.value); };
+</script>
+</body>
+</html>
